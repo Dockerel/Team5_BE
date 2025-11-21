@@ -6,6 +6,25 @@
 ## 개요
 영상 하이라이트를 분석하여 쇼츠를 생성해주는 쇼츠 자동화 서비스
 
+## 개발 정보
+* 2024.09 - 2024.11 (3M / 7명) [BE, AI]
+
+## 기술 스택
+<p dir="auto">
+<img src="https://img.shields.io/badge/-Java-DB6900?logo=Java&amp;logoColor=white&amp;labelColor=DB6900" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-Python-3776AB?logo=Python&amp;logoColor=white&amp;labelColor=3776AB" style="max-width: 100%;">
+<br>
+<img src="https://img.shields.io/badge/-Spring-6DB33F?logo=Spring&amp;logoColor=white&amp;labelColor=6DB33F" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-SpringBoot-6DB33F?logo=springboot&amp;logoColor=white&amp;labelColor=6DB33F" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-FastAPI-009688?logo=FastAPI&amp;logoColor=white&amp;labelColor=009688" style="max-width: 100%;">
+<br>
+<img src="https://img.shields.io/badge/-FFmpeg-007808?logo=ffmpeg&amp;logoColor=white&amp;labelColor=007808" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-OpenAI-412991?logo=OpenAI&amp;logoColor=white&amp;labelColor=412991" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-S3-3D8122?logo=S3&amp;logoColor=white&amp;labelColor=3D8122" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-VastAI-000000?logo=vonage&amp;logoColor=white&amp;labelColor=000000" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-ngrok-1F1E37?logo=ngrok&amp;logoColor=white&amp;labelColor=1F1E37" style="max-width: 100%;">
+</p>
+
 ## 시스템 아키텍처
 <img width="863" height="484" alt="image" src="https://github.com/user-attachments/assets/393f9747-ae90-4945-a160-c6b3dae9da4b" />
 
