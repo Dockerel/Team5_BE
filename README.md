@@ -45,98 +45,29 @@
 * 서버가 파일 데이터 중계를 하지 않으므로, 업로드 API의 응답 시간도 3448ms &rarr; 8ms로 개선
 * 서버 확장성, 안정성이 향상되고, 인프라 자원 효율 및 비용 최적화 효과를 얻음
 
-## 2. AI 기반 숏폼 추출 서비스 구현
+## 2. [AI 기반 숏폼 추출 서비스 구현](https://github.com/Dockerel/highlight-extractor)
 ### 개요
 
 <details>
 <summary>처리 과정</summary>
 
-<!-- summary 아래 한칸 공백 두어야함 -->
 ### 1.	사용자 요청
 * 클라이언트에서 Google 계정으로 로그인한 사용자가 YouTube URL, 제목, 카테고리 등의 정보를 입력
 * 해당 정보는 AI 서버의 /extract-highlights 엔드포인트로 전송
 ### 2.	비디오 하이라이트 추출 요청
 * AI 서버는 해당 YouTube 영상을 다운로드하고 사이즈를 조정
 * Whisper AI를 이용하여 비디오의 스크립트를 추출하고, GPT 모델을 통해 하이라이트 구간을 탐색
-* 이 과정은 비동기적으로 처리되며, AI 서버는 이 요청에 대해 task_id를 응답으로 반환합니다. task_id는 FastAPI의 로컬 스토리지에서 비동기 작업 상태와 결과 데이터를 관리하는 키로 사용됩니다.
-3.	작업 상태 조회 (Polling)
-    클라이언트는 task_id를 이용해 FastAPI의 /task-status/{task_id} 엔드포인트에 polling을 시도하며 작업 상태를 확인합니다.
-    작업 상태가 “완료”로 변경되면 클라이언트는 FastAPI의 /select-highlight/{task_id} 엔드포인트를 호출하여, 생성된 5개의 하이라이트 후보 영상의 S3 URL과 관련 메타데이터(DTO)를 받아옵니다.
-4.	하이라이트 선택 및 업로드
-    사용자는 5개의 하이라이트 중 하나를 선택하고, 프론트엔드에서 FastAPI의 /select-highlight 엔드포인트로 task_id와 선택한 영상의 인덱스(index)를 전송합니다.
-    FastAPI는 선택한 하이라이트를 Spring Framework 웹 애플리케이션의 /api/videos/create 엔드포인트에 전달하여, 최종적으로 해당 하이라이트를 Video 객체로 웹 서비스에 업로드합니다.
-5.	원본 비디오 다운로드 
-    업로드된 비디오가 Video 객체로 생성된 후, 사용자는 원본 비디오를 다운로드할 수 있습니다.
-    클라이언트는 Spring 웹 애플리케이션의 /api/videos/{videoId}/extract 엔드포인트에 요청하여, 원본 비디오의 AWS S3에 저장된 presigned URL을 받아 로컬로 다운로드할 수 있습니다.
-```    
-      ┌────────────┐
-      │   Client   │
-      └─────┬──────┘
-      │
-      (User Input: │ YouTube URL, ...)
-      │
-      ▼
-      ┌─────────────────────────────┐
-      │ Spring Framework Web Server │
-      └─────────────┬───────────────┘
-      │
-      POST /extract-highlights  (video info)
-      │
-      ▼
-      ┌───────────────────┐
-      │   FastAPI Server  │
-      └───────┬───────────┘
-      │
-      ┌──────────────▼───────────────┐
-      │ Background Task (Async)      │
-      │ - Video download             │
-      │ - Resize, Whisper model      │
-      │ - Highlight extraction (GPT) │
-      └──────────────┬───────────────┘
-      │
-      Respond with │ task_id
-      │
-      ▼
-      ┌────────────────────┐
-      │   Client (Polling) │
-      └─────────▲──────────┘
-      │
-      GET /task-status/{task_id}
-      │
-      If Status = "Complete"
-      │
-      ▼
-      GET /select-highlight/{task_id}
-      │
-      │
-      (5 highlight │ S3 URLs)
-      │
-      ▼
-      ┌────────────────────────────┐
-      │ Client selects one video   │
-      │ POST /select-highlight     │
-      └──────────┬─────────────────┘
-      │
-      │
-      ▼
-      ┌───────────────────────────────┐
-      │ Spring Framework Web Server   │
-      │ POST /api/videos/create       │
-      └───────────────────────────────┘
-      │
-      │
-      ▼
-      ┌────────────────────┐
-      │   AWS S3 Storage   │
-      └────────────────────┘
-      │
-      │
-      GET /api/videos/{videoId}/extract
-      │
-      ▼
-      Client receives presigned URL
-      (Download)
-```      
+* 이 과정은 비동기적으로 처리되며, AI 서버는 이 요청에 대해 task_id를 응답으로 반환
+* task_id는 AI 서버에서 비동기 작업 상태와 결과 데이터를 관리하는 키로 사용됨
+### 3.	작업 상태 조회
+* 클라이언트는 task_id를 이용해 AI 서버의 /task-status/{task_id} 엔드포인트에 polling을 시도하며 작업 상태를 확인
+* 작업 상태가 “완료”로 변경되면 클라이언트는 AI 서버의 /select-highlight/{task_id} 엔드포인트를 호출하여, 생성된 5개의 하이라이트 후보 영상의 S3 URL과 관련 메타데이터(DTO)를 받아옴
+### 4.	하이라이트 선택 및 업로드
+* 사용자는 5개의 하이라이트 중 하나를 선택하고, 프론트엔드에서 AI 서버의 /select-highlight 엔드포인트로 task_id와 선택한 영상의 인덱스(index)를 전송
+* AI 서버는 선택한 하이라이트를 웹 백엔드 서버의 /api/videos/create 엔드포인트에 전달하여, 최종적으로 해당 하이라이트를 Video 객체로 웹 서비스에 업로드
+### 5.	원본 비디오 다운로드 
+* 업로드된 비디오가 Video 객체로 생성된 후, 사용자는 원본 비디오를 다운로드 가능
+* 클라이언트는 웹 백엔드 서버의 /api/videos/{videoId}/extract 엔드포인트에 요청하여, 원본 비디오의 AWS S3에 저장된 presigned URL을 받아 로컬로 다운로드할 수 있음
 </details>
 
 * Whisper AI로 영상에서 음성을 추출하고 스크립트 자동 생성
